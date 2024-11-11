@@ -1,0 +1,4 @@
+appName: "s3-sync"
+s3BucketPath: "s3://my-eks-files/confidential_data"
+destinationPath: "/data/"
+cronSchedule: "15 0 * * *"
