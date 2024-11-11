@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.appName }}-script
+data:
+  s3-sync.sh: |-
+    #!/bin/bash
+
+    aws s3 sync {{ .Values.s3BucketPath }} {{ .Values.destinationPath }} --delete
