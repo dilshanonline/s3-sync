@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.appName }}
+  labels:
+    app: {{ .Values.appName }}
+spec:
+  schedule: {{ .Values.cronSchedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: {{ .Values.appName }}
+        spec:
+          serviceAccountName: s3-sync-sa
+          containers:
+            - name: {{ .Values.appName }}
+              image: amazon/aws-cli
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - /home/script/s3-sync.sh
+              volumeMounts:
+                - mountPath: "/data"
+                  name: s3-data
+                - mountPath: /home/script
+                  name: {{ .Values.appName }}-volume
+          volumes:
+            - name: s3-data
+              persistentVolumeClaim:
+                claimName: my-data-claim
+            - name: {{ .Values.appName }}-volume
+              configMap:
+                name: {{ .Values.appName }}-script
+                defaultMode: 0755
+          restartPolicy: OnFailure
